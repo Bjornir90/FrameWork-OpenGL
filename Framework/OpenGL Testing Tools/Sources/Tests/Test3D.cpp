@@ -4,6 +4,7 @@
 #include "Renderer.h"
 #include "imgui/imgui.h"
 #include "Camera.h"
+#include "Force.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
