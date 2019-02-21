@@ -6,7 +6,11 @@
 #include "Camera.h"
 #include "Force.h"
 
+#define GLM_ENABLE_EXPERIMENTAL
+
 #include "glm/glm.hpp"
+#include "glm/ext.hpp"
+#include <glm/gtx/string_cast.hpp>
 #include "glm/gtc/matrix_transform.hpp"
 
 #include <iostream>
@@ -26,7 +30,22 @@ namespace test {
 	// timing
 	float deltaTime = 0.0f;	// time between current frame and last frame
 	float lastFrame = 0.0f;
+	float totalTime = 0.0f;
 
+	glm::vec3 cubePositions[] = {
+				glm::vec3(0.0f,  0.0f,  0.0f),
+				glm::vec3(0.0f,  100.0f, 0.0f),
+				glm::vec3(-100.0f,  -100.0f, 0.0f),
+				glm::vec3(-100.0f,  -100.0f, 100.0f),
+
+	};
+
+	glm::vec3 cubeSpeeds[] = {
+		glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::vec3(0.0f, 0.0f, 0.0f),
+	};
 
 	void processInput(GLFWwindow *window);
 
@@ -43,7 +62,7 @@ namespace test {
 
 	Test3D::Test3D() : m_angle(1.0f), m_TranslationB(0, 0, 0),
 		m_Proj(glm::perspective(glm::radians(45.0f), 16.0f / 9.0f, 1.0f, 2000.0f)),
-		m_Vue(glm::mat4(1.0f)) {
+		m_Vue(glm::mat4(1.0f)), m_gravity(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f), glm::vec4(0, 0, 0, 0)) {
 
 
 		GLFWwindow* fen = glfwGetCurrentContext();
@@ -205,6 +224,7 @@ namespace test {
 		//On spécifie au shader (via un uniform) quel slot de texture on utilise
 		m_Shader->SetUniform1i("u_Texture", 0);
 
+
 	}
 
 
@@ -219,6 +239,7 @@ namespace test {
 		//Maj du temps pour la camera
 		float currentFrame = glfwGetTime();
 		deltaTime = 60*(currentFrame - lastFrame);
+		totalTime += deltaTime;
 		lastFrame = currentFrame;
 	}
 
@@ -258,18 +279,20 @@ namespace test {
 			//materials = shader + des donnees utiles au dessin
 			m_Shader->Bind();
 
-			glm::vec3 cubePositions[] = {
-				glm::vec3(0.0f,  0.0f,  0.0f),
-				glm::vec3(0.0f,  100.0f, 0.0f),
-				glm::vec3(-100.0f,  -100.0f, 0.0f),
-				glm::vec3(-100.0f,  -100.0f, 100.0f),
-				
-			};
-
 			for (int i = 0; i < 4; i++) {
+
+				cubePositions[i] += cubeSpeeds[i];
 
 				modele = glm::translate(glm::mat4(1.0f) ,cubePositions[i]);
 
+				cubeSpeeds[i] += glm::vec3(m_gravity.multiplyByScalar(deltaTime).getDirection());
+
+				/*std::cout << "Model Matrix before translation : " << glm::to_string(modele) << std::endl;
+
+				modele = m_gravity.multiplyByScalar(totalTime).applyToModel(modele);
+
+				std::cout << "Model Matrix after translation : " << glm::to_string(modele) << std::endl;
+				*/
 				//float angle = 20.0f * i;
 				//modele = glm::rotate(modele, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
 
@@ -299,6 +322,8 @@ namespace test {
 		ImGui::SliderFloat("Rotation Camera", &m_angle, 0.0f, 2*glm::pi<float>());
 
 		ImGui::SliderFloat3("Translation Camera", &m_TranslationB.x, -1500.0f, 1500.0f);
+
+		ImGui::SliderFloat4("Gravity :", &(m_gravity.getPointerToDirection()->x), -0.1f, 0.1f);
 
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 500.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 

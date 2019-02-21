@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="PhysicObject.cpp" />
     <ClCompile Include="Sources\Force.cpp" />
     <ClCompile Include="Sources\IndexBuffer.cpp" />
     <ClCompile Include="Sources\main.cpp" />
@@ -42,6 +43,7 @@
     <ClCompile Include="Sources\VertexBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="PhysicObject.h" />
     <ClInclude Include="Sources\Force.h" />
     <ClInclude Include="Sources\Camera.h" />
     <ClInclude Include="Sources\IndexBuffer.h" />

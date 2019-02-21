@@ -7,6 +7,7 @@
 #include "VertexBuffer.h"
 #include "VertexBufferLayout.h"
 #include "Texture.h"
+#include "Force.h"
 
 #include <memory>
 
@@ -33,6 +34,8 @@ namespace test {
 
 		glm::mat4 m_Proj, m_Vue;
 		glm::vec3 m_TranslationB;
+
+		Force m_gravity;
 
 		
 		float m_angle;
