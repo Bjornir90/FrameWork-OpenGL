@@ -5,6 +5,7 @@
 #include "imgui/imgui.h"
 #include "Camera.h"
 #include "Force.h"
+#include "PhysicObject.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 
@@ -34,17 +35,17 @@ namespace testPhysics {
 
 	glm::vec3 cubePositions[] = {
 				glm::vec3(0.0f,  0.0f,  0.0f),
-				glm::vec3(0.0f,  100.0f, 0.0f),
-				glm::vec3(-100.0f,  -100.0f, 0.0f),
-				glm::vec3(-100.0f,  -100.0f, 100.0f),
-
+				glm::vec3(0.0f,  250.0f, 0.0f)
 	};
 
 	glm::vec3 cubeSpeeds[] = {
-		glm::vec3(0.0f, 0.0f, 0.0f),
-		glm::vec3(0.0f, 0.0f, 0.0f),
-		glm::vec3(0.0f, 0.0f, 0.0f),
-		glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::vec3(0.0f, 1.0f, 0.0f),
+		glm::vec3(0.0f, -2.0f, 0.0f)
+	};
+
+	PhysicObject objects[] = {
+		PhysicObject(glm::vec4(cubePositions[0], 1.0f), 100.0, 100.0, 100.0, 10.0),
+		PhysicObject(glm::vec4(cubePositions[1], 1.0f), 100.0, 100.0, 100.0, 10.0)
 	};
 
 	void processInput(GLFWwindow *window);
@@ -224,7 +225,12 @@ namespace testPhysics {
 		//On spécifie au shader (via un uniform) quel slot de texture on utilise
 		m_Shader->SetUniform1i("u_Texture", 0);
 
-
+		//init physical objects so collision occurs
+		objects[0].applyForce(Force(glm::vec4(0.0f, 0.01f, -0.01f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
+		objects[0].update(10.0f);
+		objects[1].applyForce(Force(glm::vec4(0.0f, -0.02f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
+		objects[1].update(10.0f);
+		std::cout << "Speed of first object : " << glm::to_string(objects[0].getSpeed()) << std::endl;
 	}
 
 
@@ -279,13 +285,17 @@ namespace testPhysics {
 			//materials = shader + des donnees utiles au dessin
 			m_Shader->Bind();
 
-			for (int i = 0; i < 4; i++) {
+			if (objects[0].collidesWith(&objects[1])) {
+				objects[0].onCollision(&objects[1]);
+			}
 
-				cubePositions[i] += cubeSpeeds[i];
+			for (int i = 0; i < 2; i++) {
+
+				objects[i].update(deltaTime);
+
+				cubePositions[i] = glm::vec3(objects[i].getPos());
 
 				modele = glm::translate(glm::mat4(1.0f), cubePositions[i]);
-
-				cubeSpeeds[i] += glm::vec3(m_gravity.multiplyByScalar(deltaTime).getDirection());
 
 				/*std::cout << "Model Matrix before translation : " << glm::to_string(modele) << std::endl;
 
