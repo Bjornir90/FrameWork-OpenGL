@@ -15,7 +15,7 @@ public:
 	void applyForce(Force f);
 	void update(float delta);
 	std::vector<glm::vec4> getCornersPos();
-    bool collidesWith(PhysicObject that);
-    void onCollision(Force impactForce);
+    bool collidesWith(PhysicObject *that);
+    void onCollision(PhysicObject *that);
 };
 

@@ -23,6 +23,7 @@
 #include "Tests/TestIB3D.h"
 #include "Tests/TestLumiere.h"
 #include "Tests/MonTest.h"
+#include "Tests/TestPhysics.h"
 
 using namespace std;
 
@@ -128,6 +129,7 @@ int main() {
 		menuTest->AjouteTest<test::Test3D>("3D");
 		menuTest->AjouteTest<test::TestIB3D>("Cube IndexBuffer");
 		menuTest->AjouteTest<test::TestLumiere>("Lumiere et Illuminations");
+		menuTest->AjouteTest<testPhysics::TestPhysics>("Physique");
 		
 
 		float r = 0.0f;

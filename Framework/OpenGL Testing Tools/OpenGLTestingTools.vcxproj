@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="PhysicObject.cpp" />
+    <ClCompile Include="Sources\PhysicObject.cpp" />
     <ClCompile Include="Sources\Force.cpp" />
     <ClCompile Include="Sources\IndexBuffer.cpp" />
     <ClCompile Include="Sources\main.cpp" />
@@ -41,9 +41,10 @@
     <ClCompile Include="Sources\Vendor\stb_image\stb_image.cpp" />
     <ClCompile Include="Sources\VertexArray.cpp" />
     <ClCompile Include="Sources\VertexBuffer.cpp" />
+    <ClCompile Include="Sources\Tests\TestPhysics.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="PhysicObject.h" />
+    <ClInclude Include="Sources\PhysicObject.h" />
     <ClInclude Include="Sources\Force.h" />
     <ClInclude Include="Sources\Camera.h" />
     <ClInclude Include="Sources\IndexBuffer.h" />
@@ -306,6 +307,7 @@
     <ClInclude Include="Sources\VertexBuffer.h" />
     <ClInclude Include="Sources\VertexArray.h" />
     <ClInclude Include="Sources\VertexBufferLayout.h" />
+    <ClInclude Include="Sources\Tests\TestPhysics.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Ressources\Shaders\Basic.shader" />

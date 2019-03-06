@@ -1,4 +1,5 @@
 #include "PhysicObject.h"
+#include <iostream>
 
 
 
@@ -28,8 +29,10 @@ void PhysicObject::update(float delta)
 std::vector<glm::vec4> PhysicObject::getCornersPos()
 {
 	std::vector<glm::vec4> corners = std::vector<glm::vec4>();
-	glm::vec4 corner(position.x - width / 2.0, position.y - height / 2.0, position.z - length / 2.0, 1.0);
+	glm::vec4 corner(position.x, position.y, position.z, 1.0);
 	corners.push_back(corner);
+	std::cout << "Error : operation not yet supported" << std::endl;
+	return corners;
 }
 
 bool PhysicObject::collidesWith(PhysicObject *that){
@@ -44,8 +47,8 @@ bool PhysicObject::collidesWith(PhysicObject *that){
 }
 
 void PhysicObject::onCollision(PhysicObject *that){
-	glm::vec4 thatMomentum = that->speed*that->mass;
-	glm::vec4 thisMomentum = this->speed*this->mass;
+	glm::vec4 thatMomentum = that->speed*(float)that->mass;
+	glm::vec4 thisMomentum = this->speed*(float)this->mass;
 	glm::vec4 sumMomentum = thatMomentum+thisMomentum;
 	glm::vec4 thatAfterCollisionMomentum = thatMomentum-sumMomentum;
 	glm::vec4 thisAfterCollisionMomentum = thisMomentum-sumMomentum;
