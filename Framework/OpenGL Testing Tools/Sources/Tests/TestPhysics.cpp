@@ -226,11 +226,13 @@ namespace testPhysics {
 		m_Shader->SetUniform1i("u_Texture", 0);
 
 		//init physical objects so collision occurs
-		objects[0].applyForce(Force(glm::vec4(0.0f, 0.01f, -0.01f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
+		objects[0].applyForce(Force(glm::vec4(0.0f, 0.01f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
 		objects[0].update(10.0f);
 		objects[1].applyForce(Force(glm::vec4(0.0f, -0.02f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
 		objects[1].update(10.0f);
 		std::cout << "Speed of first object : " << glm::to_string(objects[0].getSpeed()) << std::endl;
+		glm::vec3 testTemp = glm::vec3(0.0f, 1.0f, 0.0f);
+		std::cout << "Original : " << glm::to_string(testTemp) << " Inverse : " << glm::to_string(-testTemp) << std::endl;
 	}
 
 

@@ -57,15 +57,27 @@ bool PhysicObject::collidesWith(PhysicObject *that){
 }
 
 void PhysicObject::onCollision(PhysicObject *that){
-	glm::vec4 thatMomentum = that->speed*(float)that->mass;
-	glm::vec4 thisMomentum = this->speed*(float)this->mass;
+	//glm::vec4 thatMomentum = that->speed*(float)that->mass;
+	//glm::vec4 thisMomentum = this->speed*(float)this->mass;
+	float massSum = (that->mass + this->mass);
+	glm::vec3 normalizedSpeed = glm::normalize(glm::vec3(speed));
+	glm::vec3 normalizedThatSpeed = glm::normalize(glm::vec3(that->speed));
+	std::cout << "Speed direction : " << glm::to_string(normalizedSpeed) << " That speed : " << glm::to_string(normalizedThatSpeed) << std::endl;
+	if ( normalizedSpeed == -normalizedThatSpeed || normalizedSpeed == normalizedThatSpeed) {
+		std::cout << "Speeds have same direction" << std::endl;
+		speed = glm::vec4(glm::vec3((-speed + that->speed))*(float)(that->mass / massSum), 1.0f);
+		that->speed = glm::vec4(glm::vec3((speed - that->speed))*(float)(mass / massSum), 1.0f);
+		position = position + speed * 10.0f;
+		that->position = that->position + that->speed*10.0f;
+		return;
+	}
 	glm::vec3 bisector = glm::normalize(glm::normalize(that->speed) + glm::normalize(this->speed));
 	//ATTENTION : this will cause nan computation if the two speeds have the exact same direction
 	glm::vec3 normalToCollisionPlane = glm::cross(glm::vec3(that->speed), glm::vec3(this->speed));
 	glm::vec3 normalToBisector = glm::cross(bisector, normalToCollisionPlane);
 	bisector = glm::normalize(bisector);
 	normalToBisector = glm::normalize(normalToBisector);
-	std::cout << glm::to_string(bisector) << glm::to_string(normalToCollisionPlane) << std::endl;
+	std::cout << "Bisector : " << glm::to_string(bisector) << " Normal : " << glm::to_string(normalToBisector) << std::endl;
 	//Now bisector and its normal are a base of the collision plane
 	//We project the two speed vectors to the normal vector
 	float thisNormalSpeedComponent = glm::dot(glm::vec3(this->speed), normalToBisector);
@@ -74,9 +86,9 @@ void PhysicObject::onCollision(PhysicObject *that){
 	float thatOtherSpeedComponent = glm::dot(glm::vec3(that->speed), bisector);
 	//Reverse the speed components normal to the collision
 	//Masses are inversed because the biggest mass gives the most speed to the other object
-	glm::vec3 thisNewSpeed = (-2 * thisNormalSpeedComponent * normalToBisector + thisOtherSpeedComponent * bisector) * (float)(that->mass / (that->mass + this->mass));
-	glm::vec3 thatNewSpeed = (-2 * thatNormalSpeedComponent * normalToBisector + thatOtherSpeedComponent * bisector) * (float)(this->mass / (that->mass + this->mass));
-	std::cout << "New speed of this : " << glm::to_string(thisNewSpeed) << " new speed of that : " << glm::to_string(thatNewSpeed) << std::endl;
+	glm::vec3 thisNewSpeed = (-2 * thisNormalSpeedComponent * normalToBisector + thisOtherSpeedComponent * bisector) * (float)(that->mass / mass);
+	glm::vec3 thatNewSpeed = (-2 * thatNormalSpeedComponent * normalToBisector + thatOtherSpeedComponent * bisector) * (float)(this->mass / massSum);
+	std::cout << "New speed of this : " << glm::to_string(thisNewSpeed) << " Old speed : " << glm::to_string(speed) << std::endl << " new speed of that : " << glm::to_string(thatNewSpeed) << " Old speed : " << glm::to_string(that->speed) << std::endl;
 	this->speed = glm::vec4(thisNewSpeed, 1.0f);
 	that->speed = glm::vec4(thatNewSpeed, 1.0f);
 	position = position + speed*10.0f;
