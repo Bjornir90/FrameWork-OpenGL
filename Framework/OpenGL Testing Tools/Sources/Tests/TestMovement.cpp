@@ -1,4 +1,4 @@
-#include "TestPhysics.h"
+#include "TestMovement.h"
 #include "GLFW/glfw3.h"
 
 #include "Renderer.h"
@@ -16,14 +16,14 @@
 
 #include <iostream>
 
-namespace testPhysics {
+namespace testMovement {
 
 	// settings
 	const unsigned int SCR_WIDTH = 960;
 	const unsigned int SCR_HEIGHT = 540;
 
 	// camera
-	Camera camera(glm::vec3(0.0f, 0.0f, 200.0f));
+	Camera camera(glm::vec3(0.0f, 100.0f, 300.0f));
 	float lastX = SCR_WIDTH / 2.0f;
 	float lastY = SCR_HEIGHT / 2.0f;
 	bool firstMouse = true;
@@ -33,19 +33,25 @@ namespace testPhysics {
 	float lastFrame = 0.0f;
 	float totalTime = 0.0f;
 
+	Force jumpForce(glm::vec4(0.0f, 0.2f, 0.0f, 0.0f), glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+	Force movementForce(glm::vec4(0.1f, 0.0f, 0.0f, 0.0f), glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+	float playerAngle = 0.0f;
+
 	glm::vec3 cubePositions[] = {
-		glm::vec3(0.0f,  0.0f,  0.0f),
-		glm::vec3(0.0f,  250.0f, 0.0f)
+		glm::vec3(0.0f,  150.0f,  0.0f),
+		glm::vec3(0.0f,  0.0f, 0.0f)
 	};
 
 	glm::vec3 cubeSpeeds[] = {
-		glm::vec3(0.0f, 1.0f, 0.0f),
-		glm::vec3(0.0f, -2.0f, 0.0f)
+		glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::vec3(0.0f, 0.0f, 0.0f)
 	};
+
+	glm::mat4 playerRotation = glm::rotate(playerAngle, glm::vec3(0.0f, 1.0f, 0.0f));
 
 	PhysicObject objects[] = {
 		PhysicObject(glm::vec4(cubePositions[0], 1.0f), 100.0, 100.0, 100.0, 10.0, false),
-		PhysicObject(glm::vec4(cubePositions[1], 1.0f), 100.0, 100.0, 100.0, 10.0, false)
+		PhysicObject(glm::vec4(cubePositions[1], 1.0f), 100.0, 100.0, 100.0, 10.0, true)
 	};
 
 	void processInput(GLFWwindow *window);
@@ -61,9 +67,9 @@ namespace testPhysics {
 	void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 
-	TestPhysics::TestPhysics() : m_angle(1.0f), m_TranslationB(0, 0, 0),
+	TestMovement::TestMovement() : m_angle(1.0f), m_TranslationB(0, 0, 0),
 		m_Proj(glm::perspective(glm::radians(45.0f), 16.0f / 9.0f, 1.0f, 2000.0f)),
-		m_Vue(glm::mat4(1.0f)), m_gravity(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f), glm::vec4(0, 0, 0, 0)) {
+		m_Vue(glm::mat4(1.0f)), m_gravity(glm::vec4(0.0f, -0.0005f, 0.0f, 0.0f), glm::vec4(0, 0, 0, 0)) {
 
 
 		GLFWwindow* fen = glfwGetCurrentContext();
@@ -224,25 +230,17 @@ namespace testPhysics {
 
 		//On spécifie au shader (via un uniform) quel slot de texture on utilise
 		m_Shader->SetUniform1i("u_Texture", 0);
-
-		//init physical objects so collision occurs
-		objects[0].applyForce(Force(glm::vec4(0.0f, 0.01f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
-		objects[0].update(10.0f);
-		objects[1].applyForce(Force(glm::vec4(0.0f, -0.02f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
-		objects[1].update(10.0f);
-		std::cout << "Speed of first object : " << glm::to_string(objects[0].getSpeed()) << std::endl;
-		glm::vec3 testTemp = glm::vec3(0.0f, 1.0f, 0.0f);
-		std::cout << "Original : " << glm::to_string(testTemp) << " Inverse : " << glm::to_string(-testTemp) << std::endl;
+		
 	}
 
 
-	TestPhysics::~TestPhysics() {
+	TestMovement::~TestMovement() {
 
 		//Rien à faire ici => smarts pointeurs sont détruits lorsqu'ils sont hors de portée
 
 	}
 
-	void TestPhysics::OnUpdate(float delta) {
+	void TestMovement::OnUpdate(float delta) {
 
 		//Maj du temps pour la camera
 		float currentFrame = glfwGetTime();
@@ -251,7 +249,7 @@ namespace testPhysics {
 		lastFrame = currentFrame;
 	}
 
-	void TestPhysics::OnRender() {
+	void TestMovement::OnRender() {
 
 		GLCALL(glClearColor(235.0f / 255.0f, 200.0f / 255.0f, 60.0f / 255.0f, 1.0f));
 		GLCALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
@@ -291,20 +289,22 @@ namespace testPhysics {
 				objects[0].onCollision(&objects[1]);
 			}
 
-			for (int i = 0; i < 2; i++) {
+			objects[0].applyForce(m_gravity);
 
-				objects[i].update(deltaTime);
+			for (int i = 0; i < 2; i++) {
 
 				cubePositions[i] = glm::vec3(objects[i].getPos());
 
+				objects[i].update(deltaTime);
+
 				modele = glm::translate(glm::mat4(1.0f), cubePositions[i]);
 
-				/*std::cout << "Model Matrix before translation : " << glm::to_string(modele) << std::endl;
-
-				modele = m_gravity.multiplyByScalar(totalTime).applyToModel(modele);
-
-				std::cout << "Model Matrix after translation : " << glm::to_string(modele) << std::endl;
-				*/
+				if (i == 0) {
+					//modele = glm::translate(modele, cubePositions[i] * -1.0f);
+					modele = glm::rotate(modele, playerAngle, glm::vec3(0.0f, 1.0f, 0.0f));
+					//modele = glm::translate(modele, cubePositions[i]);
+				}
+				
 				//float angle = 20.0f * i;
 				//modele = glm::rotate(modele, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
 
@@ -327,7 +327,7 @@ namespace testPhysics {
 
 	}
 
-	void TestPhysics::OnImGuiRender() {
+	void TestMovement::OnImGuiRender() {
 
 		//Creation du contenu de la fenêtre imGui
 
@@ -348,12 +348,18 @@ namespace testPhysics {
 		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 			glfwSetWindowShouldClose(window, true);
 
-		//on quitte le mode camera
+		//Saut
 		if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+			//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			//glfwSetCursorPosCallback(window, NULL);
+			objects[0].applyForce(jumpForce);
+		}
+
+		//on quitte le mode camera
+		if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 			glfwSetCursorPosCallback(window, NULL);
 		}
-
 
 		//on rentre en mode camera
 		if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
@@ -364,13 +370,17 @@ namespace testPhysics {
 
 		//ZQSD mode
 		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-			camera.ProcessKeyboard(FORWARD, deltaTime);
+			objects[0].applyForce(movementForce.multiplyByMatrix(playerRotation));
 		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-			camera.ProcessKeyboard(BACKWARD, deltaTime);
-		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-			camera.ProcessKeyboard(LEFT, deltaTime);
-		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-			camera.ProcessKeyboard(RIGHT, deltaTime);
+			objects[0].applyForce(movementForce.multiplyByMatrix(playerRotation).multiplyByScalar(-1.0f));
+		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+			playerAngle += glm::radians(5.0f);
+			playerRotation = glm::rotate(playerAngle, glm::vec3(0.0f, 1.0f, 0.0f));
+		}
+		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+			playerAngle -= glm::radians(5.0f);
+			playerRotation = glm::rotate(playerAngle, glm::vec3(0.0f, 1.0f, 0.0f));
+		}
 
 		//Mode fleches
 		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)

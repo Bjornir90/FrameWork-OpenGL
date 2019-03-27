@@ -35,6 +35,13 @@ Force Force::multiplyByScalar(float k)
 	return result;
 }
 
+Force Force::multiplyByMatrix(glm::mat4 mat)
+{
+	glm::vec4 newDirection = mat * direction;
+	Force result(newDirection, applicationPoint);
+	return result;
+}
+
 glm::mat4 Force::applyToModel(glm::mat4 model)
 {
 	glm::mat4 result = glm::translate(model, glm::vec3(direction));

@@ -9,9 +9,10 @@ class PhysicObject
 private:
 	glm::vec4 position, speed;//position is left corner, for collisions
 	double width, height, length, mass;//x, y and z axis dimension of the axis aligned bounding box
+	bool isAnchor;
 	std::vector<Force> *forces;
 public:
-	PhysicObject(glm::vec4 position, double width, double height, double length, double mass);
+	PhysicObject(glm::vec4 position, double width, double height, double length, double mass, bool isAnchor);
 	~PhysicObject();
 	void applyForce(Force f);
 	void update(float delta);

@@ -28,6 +28,7 @@ public:
 	Force multiplyByScalar(float k);
 	Force multiplyByScalar(int k);
 	void multiplySelfByScalar(float k);
+	Force multiplyByMatrix(glm::mat4 mat);
 
 	glm::mat4 applyToModel(glm::mat4 model);
 };
