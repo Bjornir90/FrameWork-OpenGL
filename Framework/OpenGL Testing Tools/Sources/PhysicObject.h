@@ -3,6 +3,7 @@
 #include "Force.h"
 #include <vector>
 
+enum Sides {LEFTSIDE, RIGHTSIDE, TOP, BOT, FRONT, BEHIND};
 
 class PhysicObject
 {
@@ -17,8 +18,8 @@ public:
 	void applyForce(Force f);
 	void update(float delta);
 	std::vector<glm::vec4> getCornersPos();
-    bool collidesWith(PhysicObject *that);
-    void onCollision(PhysicObject *that);
+    bool collidesWith(PhysicObject *that, Sides * collisionSide);
+    void onCollision(PhysicObject *that, Sides * collisionSide);
 	glm::vec4 getSpeed();
 	glm::vec4 getPos();
 };

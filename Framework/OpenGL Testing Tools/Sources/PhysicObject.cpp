@@ -25,10 +25,6 @@ void PhysicObject::update(float delta)
 		return;
 	}
 	Force *total = new Force(glm::vec4(0), glm::vec4(0));
-	/*for (auto i = forces->begin(); i != forces->end(); i++) {
-		total = i->addForce(total);
-		forces->erase(i);
-	}*/
 	for (std::vector<int>::size_type i = 0; i < forces->size(); i++) {
 		total = total->addForce(&(forces->at(i)));
 	}
@@ -47,11 +43,29 @@ std::vector<glm::vec4> PhysicObject::getCornersPos()
 	return corners;
 }
 
-bool PhysicObject::collidesWith(PhysicObject *that){
-	if(this->position.x < that->position.x+that->width && this->position.x+this->width > that->position.x){//horizontal check
-		if(this->position.y < that->position.y+that->height && this->position.y+this->height > that->position.y) {//vertical check
-			if(this->position.z < that->position.z+that->length && this->position.z+this->length > that->position.z) {//depth check
+bool PhysicObject::collidesWith(PhysicObject *that, Sides *collisionSide){
+	//These are the coordinates for each sides
+	float thisLeft = this->position.x, thatRight = that->position.x + that->width, thisRight = this->position.x + this->width, thatLeft = that->position.x;
+	float thisTop = this->position.y, thatBot = that->position.y + that->height, thisBot = this->position.y + this->height, thatTop = that->position.y;
+	float thisFront = this->position.z, thatBehind = that->position.z + that->length, thisBehind = this->position.z + this->length, thatFront = that->position.z;
+	
+	if(thisLeft < thatRight && thisRight > thatLeft){//horizontal check
+		if(thisTop < thatBot && thisBot > thatTop) {//vertical check
+			if(thisFront < thatBehind && thisBehind > thatFront) {//depth check
 				std::cout << "Collision" << std::endl;
+
+				//Now calculates distance to each sides, to determine on which the collision has occured
+				//All distances are from the indicated sides on this object
+				float distances[] = {/*leftDistance = */ abs(thisLeft - thatRight), /*rightDistance = */abs(thisRight - thatLeft), /*topDistance = */abs(thisTop - thatBot), /*botDistance = */abs(thisBot - thatTop), /*frontDistance = */abs(thisFront - thatBehind), /*behindDistance =*/ abs(thisBehind - thatFront) };
+				int indexOfSmallestDistance = 0;
+
+				for (int i = 1; i < 6; i++) {
+					if (distances[i] < distances[indexOfSmallestDistance]) indexOfSmallestDistance = i;
+				}
+
+				//Same order of sides in distances and Sides enum
+				std::cout << "on side " << indexOfSmallestDistance << std::endl;
+				*collisionSide = (Sides)indexOfSmallestDistance;
 				return true;
 			}
 		}
@@ -59,59 +73,36 @@ bool PhysicObject::collidesWith(PhysicObject *that){
 	return false;
 }
 
-void PhysicObject::onCollision(PhysicObject *that){
-	//glm::vec4 thatMomentum = that->speed*(float)that->mass;
-	//glm::vec4 thisMomentum = this->speed*(float)this->mass;
-	float massSum = (that->mass + this->mass);
-	glm::vec3 normalizedSpeed = glm::normalize(glm::vec3(speed));
-	glm::vec3 normalizedThatSpeed = (that->speed != glm::vec4(0.0f))?glm::normalize(glm::vec3(that->speed)):glm::vec3(0.0f);
-	std::cout << "Speed direction : " << glm::to_string(normalizedSpeed) << " That speed : " << glm::to_string(normalizedThatSpeed) << std::endl;
+void PhysicObject::onCollision(PhysicObject *that, Sides * collisionSide){
+	Sides side = *collisionSide;
+	glm::vec3 normalToFace;
+	glm::vec3 thisSpeed = glm::vec3(this->speed), thatSpeed = glm::vec3(that->speed); 
+	if (side == LEFTSIDE) normalToFace = glm::vec3(-1.0f, 0.0f, 0.0f);
+	else if(side == RIGHTSIDE) normalToFace = glm::vec3(1.0f, 0.0f, 0.0f);
+	else if (side == TOP) normalToFace = glm::vec3(0.0f, -1.0f, 0.0f);
+	else if (side == BOT) normalToFace = glm::vec3(0.0f, 1.0f, 0.0f);
+	else if (side == FRONT) normalToFace = glm::vec3(0.0f, 0.0f, -1.0f);
+	else if (side == BEHIND) normalToFace = glm::vec3(0.0f, 0.0f, 1.0f);
 
-	//If one of the object is not moving, simply reverse the moving object direction normal to the collision plane
-	if (that->speed == glm::vec4(0.0f)) {
+	float thisNormalComponent = glm::dot(normalToFace, thisSpeed);
 
-	}
-
-	//If the objects have the same speed direction, perform a special computation, otherwise we get errors
-	if ( normalizedSpeed == -normalizedThatSpeed || normalizedSpeed == normalizedThatSpeed) {
-		std::cout << "Speeds have same direction" << std::endl;
-		speed = glm::vec4(glm::vec3((-speed + that->speed))*(float)(that->mass / massSum), 1.0f);
-		position = position + speed * 10.0f;
-		if (!that->isAnchor) {
-			that->speed = glm::vec4(glm::vec3((speed - that->speed))*(float)(mass / massSum), 1.0f);
-			that->position = that->position + that->speed*10.0f;
-		}
+	//If the other object is immobile, simply reverse the normal component of this speed
+	if (thatSpeed == glm::vec3(0.0f)) {
+		thisSpeed = -2 * thisNormalComponent * normalToFace + thisSpeed;
+		std::cout << "New this speed : " << glm::to_string(thisSpeed) << "this normal component : " << thisNormalComponent << std::endl;
+		this->speed = glm::vec4(thisSpeed, 0.0f);
+		this->update(2.0f);
 		return;
 	}
-	glm::vec3 bisector = glm::normalize(glm::normalize(that->speed) + glm::normalize(this->speed));
 
-	//NB : The collision plane refered to in this method is the plane containing the two speed vectors of the colliding objects
+	float thatNormalComponent = glm::dot(normalToFace, thatSpeed);
 
-	//ATTENTION : this will cause nan computation if the two speeds have the exact same direction
-	glm::vec3 normalToCollisionPlane = glm::cross(glm::vec3(that->speed), glm::vec3(this->speed));
-	glm::vec3 normalToBisector = glm::cross(bisector, normalToCollisionPlane);
+	thisSpeed = (-2.0f * thisNormalComponent * normalToFace + thisSpeed) * (float) (that->mass/(this->mass+that->mass));
+		thatSpeed = (-2.0f * thatNormalComponent * normalToFace + thatSpeed) * (float) (this->mass / (this->mass + that->mass));
 
-	bisector = glm::normalize(bisector);
-	normalToBisector = glm::normalize(normalToBisector);
-	std::cout << "Bisector : " << glm::to_string(bisector) << " Normal : " << glm::to_string(normalToBisector) << std::endl;
-
-	//Now bisector and its normal are a base of the collision plane
-	//We project the two speed vectors to the normal vector
-	float thisNormalSpeedComponent = glm::dot(glm::vec3(this->speed), normalToBisector*-1.0f);
-	float thatNormalSpeedComponent = glm::dot(glm::vec3(that->speed), normalToBisector);
-	float thisOtherSpeedComponent = glm::dot(glm::vec3(this->speed), bisector);
-	float thatOtherSpeedComponent = glm::dot(glm::vec3(that->speed), bisector);
-	//Reverse the speed components normal to the collision
-	//Masses are inversed because the biggest mass gives the most speed to the other object
-	glm::vec3 thisNewSpeed = (2 * thisNormalSpeedComponent * normalToBisector + thisOtherSpeedComponent * bisector) * (float)(that->mass / mass);
-	glm::vec3 thatNewSpeed = (2 * thatNormalSpeedComponent * normalToBisector + thatOtherSpeedComponent * bisector) * (float)(this->mass / massSum);
-	std::cout << "New speed of this : " << glm::to_string(thisNewSpeed) << " Old speed : " << glm::to_string(speed) << std::endl << " new speed of that : " << glm::to_string(thatNewSpeed) << " Old speed : " << glm::to_string(that->speed) << std::endl;
-	this->speed = glm::vec4(thisNewSpeed, 1.0f);
-	position = position + speed * 10.0f;
-	if (!that->isAnchor) {
-		that->speed = glm::vec4(thatNewSpeed, 1.0f);
-		that->position = that->position + that->speed*10.0f;
-	}	
+	this->speed = glm::vec4(thisSpeed, 0.0f);
+	that->speed = glm::vec4(thatSpeed, 0.0f);
+	this->update(2.0f);
 }
 
 glm::vec4 PhysicObject::getSpeed()

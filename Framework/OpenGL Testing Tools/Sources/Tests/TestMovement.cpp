@@ -285,8 +285,10 @@ namespace testMovement {
 			//materials = shader + des donnees utiles au dessin
 			m_Shader->Bind();
 
-			if (objects[0].collidesWith(&objects[1])) {
-				objects[0].onCollision(&objects[1]);
+			Sides collisionSide;
+
+			if (objects[0].collidesWith(&objects[1], &collisionSide)) {
+				objects[0].onCollision(&objects[1], &collisionSide);
 			}
 
 			objects[0].applyForce(m_gravity);
