@@ -285,7 +285,7 @@ namespace test {
 
 				modele = glm::translate(glm::mat4(1.0f) ,cubePositions[i]);
 
-				cubeSpeeds[i] += glm::vec3(m_gravity.multiplyByScalar(deltaTime).getDirection());
+				cubeSpeeds[i] += glm::vec3(m_gravity.MultiplyByScalar(deltaTime).GetDirection());
 
 				/*std::cout << "Model Matrix before translation : " << glm::to_string(modele) << std::endl;
 
@@ -323,7 +323,7 @@ namespace test {
 
 		ImGui::SliderFloat3("Translation Camera", &m_TranslationB.x, -1500.0f, 1500.0f);
 
-		ImGui::SliderFloat4("Gravity :", &(m_gravity.getPointerToDirection()->x), -0.1f, 0.1f);
+		ImGui::SliderFloat4("Gravity :", &(m_gravity.GetPointerToDirection()->x), -0.1f, 0.1f);
 
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 500.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 

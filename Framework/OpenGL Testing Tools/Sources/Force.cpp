@@ -3,7 +3,7 @@
 
 
 
-Force::Force(glm::vec4 direction, glm::vec4 applicationPoint): direction(direction), applicationPoint(applicationPoint)
+Force::Force(glm::vec4 direction, glm::vec4 applicationPoint): m_direction(direction), m_applicationPoint(applicationPoint)
 {
 }
 
@@ -11,40 +11,40 @@ Force::~Force()
 {
 }
 
-Force * Force::addForce(Force * other)
+Force* Force::AddForce(Force* other)
 {
-	glm::vec4 sum = other->getDirection() + direction;
+	glm::vec4 sum = other->GetDirection() + m_direction;
 	//two added forces should have the same application point, might change when moments are added
-	return new Force(sum, applicationPoint);
+	return new Force(sum, m_applicationPoint);
 }
 
-void Force::moveTo(glm::vec4 newApplicationPoint)
+void Force::MoveTo(glm::vec4 newApplicationPoint)
 {
-	applicationPoint = newApplicationPoint;
+	m_applicationPoint = newApplicationPoint;
 }
 
-void Force::moveBy(glm::vec4 delta)
+void Force::MoveBy(glm::vec4 delta)
 {
-	applicationPoint += delta;
+	m_applicationPoint += delta;
 }
 
-Force Force::multiplyByScalar(float k)
+Force Force::MultiplyByScalar(float k)
 {
-	glm::vec4 newDirection = direction * k;
-	Force result(newDirection, applicationPoint);
+	glm::vec4 newDirection = m_direction * k;
+	Force result(newDirection, m_applicationPoint);
 	return result;
 }
 
-Force Force::multiplyByMatrix(glm::mat4 mat)
+Force Force::MultiplyByMatrix(glm::mat4 mat)
 {
-	glm::vec4 newDirection = mat * direction;
-	Force result(newDirection, applicationPoint);
+	glm::vec4 newDirection = mat * m_direction;
+	Force result(newDirection, m_applicationPoint);
 	return result;
 }
 
-glm::mat4 Force::applyToModel(glm::mat4 model)
+glm::mat4 Force::ApplyToModel(glm::mat4 model)
 {
-	glm::mat4 result = glm::translate(model, glm::vec3(direction));
+	glm::mat4 result = glm::translate(model, glm::vec3(m_direction));
 	return result;
 }
 

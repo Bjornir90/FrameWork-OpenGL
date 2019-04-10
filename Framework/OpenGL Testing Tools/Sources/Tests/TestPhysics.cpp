@@ -45,7 +45,7 @@ namespace testPhysics {
 
 	PhysicObject objects[] = {
 		PhysicObject(glm::vec4(cubePositions[0], 1.0f), 100.0, 100.0, 100.0, 10.0, false),
-		PhysicObject(glm::vec4(cubePositions[1], 1.0f), 100.0, 100.0, 100.0, 10.0, false)
+		PhysicObject(glm::vec4(cubePositions[1], 1.0f), 100.0, 100.0, 100.0, 50.0, false)
 	};
 
 	void processInput(GLFWwindow *window);
@@ -226,10 +226,10 @@ namespace testPhysics {
 		m_Shader->SetUniform1i("u_Texture", 0);
 
 		//init physical objects so collision occurs
-		objects[0].applyForce(Force(glm::vec4(0.0f, 0.01f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
-		objects[0].update(10.0f);
-		objects[1].applyForce(Force(glm::vec4(0.0f, -0.02f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
-		objects[1].update(10.0f);
+		objects[0].applyForce(Force(glm::vec4(0.0f, 0.1f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
+		objects[0].update(1.0f);
+		objects[1].applyForce(Force(glm::vec4(0.1f, -0.35f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
+		objects[1].update(1.0f);
 		std::cout << "Speed of first object : " << glm::to_string(objects[0].getSpeed()) << std::endl;
 		glm::vec3 testTemp = glm::vec3(0.0f, 1.0f, 0.0f);
 		std::cout << "Original : " << glm::to_string(testTemp) << " Inverse : " << glm::to_string(-testTemp) << std::endl;
@@ -287,8 +287,10 @@ namespace testPhysics {
 			//materials = shader + des donnees utiles au dessin
 			m_Shader->Bind();
 
-			if (objects[0].collidesWith(&objects[1])) {
-				objects[0].onCollision(&objects[1]);
+			Sides collisionSide;
+
+			if (objects[0].collidesWith(&objects[1], &collisionSide)) {
+				objects[0].onCollision(&objects[1], &collisionSide);
 			}
 
 			for (int i = 0; i < 2; i++) {
@@ -335,7 +337,7 @@ namespace testPhysics {
 
 		ImGui::SliderFloat3("Translation Camera", &m_TranslationB.x, -1500.0f, 1500.0f);
 
-		ImGui::SliderFloat4("Gravity :", &(m_gravity.getPointerToDirection()->x), -0.1f, 0.1f);
+		ImGui::SliderFloat4("Gravity :", &(m_gravity.GetPointerToDirection()->x), -0.1f, 0.1f);
 
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 500.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 

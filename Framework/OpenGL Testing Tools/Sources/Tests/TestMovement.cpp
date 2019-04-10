@@ -285,8 +285,10 @@ namespace testMovement {
 			//materials = shader + des donnees utiles au dessin
 			m_Shader->Bind();
 
-			if (objects[0].collidesWith(&objects[1])) {
-				objects[0].onCollision(&objects[1]);
+			Sides collisionSide;
+
+			if (objects[0].collidesWith(&objects[1], &collisionSide)) {
+				objects[0].onCollision(&objects[1], &collisionSide);
 			}
 
 			objects[0].applyForce(m_gravity);
@@ -335,7 +337,7 @@ namespace testMovement {
 
 		ImGui::SliderFloat3("Translation Camera", &m_TranslationB.x, -1500.0f, 1500.0f);
 
-		ImGui::SliderFloat4("Gravity :", &(m_gravity.getPointerToDirection()->x), -0.1f, 0.1f);
+		ImGui::SliderFloat4("Gravity :", &(m_gravity.GetPointerToDirection()->x), -0.1f, 0.1f);
 
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 500.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
@@ -367,17 +369,41 @@ namespace testMovement {
 			glfwSetCursorPosCallback(window, mouse_callback);
 		}
 
+		// Get controller's state
+		int nbJoystickAxes, nbJoystickButtons; // 6 et 14 avec manette xbox 360
+		const float *axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &nbJoystickAxes);
+		// 0 : left joystick -> axe X (cosinus)
+		// 1 : left joystick -> axe Y (sinus)
+		// 2 : right joystick -> axe X (cosinus)
+		// 3 : right joystick -> axe Y (sinus)
+		// 4 : LT button
+		// 5 : RT button
+		const unsigned char *buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &nbJoystickButtons);
+		// 0 : A button
+		// 1 : B button
+		// 2 : X button
+		// 3 : Y button
+		// 4 : LB button
+		// 5 : RB button
+		// 6 : ??
+		// 7 : ??
+		// 8 : left joystick click
+		// 9 : right joystick click
+		// 10 : top cross
+		// 11 : right cross
+		// 12 : bottom cross
+		// 13 : left cross7
 
 		//ZQSD mode
-		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-			objects[0].applyForce(movementForce.multiplyByMatrix(playerRotation));
-		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-			objects[0].applyForce(movementForce.multiplyByMatrix(playerRotation).multiplyByScalar(-1.0f));
-		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS || axes[1] > 0.5f)
+			objects[0].applyForce(movementForce.MultiplyByMatrix(playerRotation));
+		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS || axes[1] < -0.5f)
+			objects[0].applyForce(movementForce.MultiplyByMatrix(playerRotation).MultiplyByScalar(-1.0f));
+		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS || axes[0] > 0.5f) {
 			playerAngle += glm::radians(5.0f);
 			playerRotation = glm::rotate(playerAngle, glm::vec3(0.0f, 1.0f, 0.0f));
 		}
-		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS || axes[0] < -0.5f) {
 			playerAngle -= glm::radians(5.0f);
 			playerRotation = glm::rotate(playerAngle, glm::vec3(0.0f, 1.0f, 0.0f));
 		}

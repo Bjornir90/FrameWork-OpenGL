@@ -4,32 +4,32 @@
 class Force
 {
 private:
-	glm::vec4 direction, applicationPoint;
+	glm::vec4 m_direction, m_applicationPoint;
 public:
 	Force(glm::vec4 direction, glm::vec4 applicationPoint);
 	~Force();
-	Force *addForce(Force *other);
+	Force* AddForce(Force* other);
 
-	glm::vec4 getDirection() {
-		return direction;
+	glm::vec4 GetDirection() {
+		return m_direction;
 	}
 
-	glm::vec4* getPointerToDirection() {
-		return &direction;
+	glm::vec4* GetPointerToDirection() {
+		return &m_direction;
 	}
 
-	glm::vec4 getApplicationPoint() {
-		return applicationPoint;
+	glm::vec4 GetApplicationPoint() {
+		return m_applicationPoint;
 	}
 
-	void moveTo(glm::vec4 newApplicationPoint);
-	void moveBy(glm::vec4 delta);
+	void MoveTo(glm::vec4 newApplicationPoint);
+	void MoveBy(glm::vec4 delta);
 
-	Force multiplyByScalar(float k);
-	Force multiplyByScalar(int k);
-	void multiplySelfByScalar(float k);
-	Force multiplyByMatrix(glm::mat4 mat);
+	Force MultiplyByScalar(float k);
+	Force MultiplyByScalar(int k);
+	void MultiplySelfByScalar(float k);
+	Force MultiplyByMatrix(glm::mat4 mat);
 
-	glm::mat4 applyToModel(glm::mat4 model);
+	glm::mat4 ApplyToModel(glm::mat4 model);
 };
 
