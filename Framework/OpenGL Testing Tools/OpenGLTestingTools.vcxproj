@@ -42,6 +42,7 @@
     <ClCompile Include="Sources\VertexArray.cpp" />
     <ClCompile Include="Sources\VertexBuffer.cpp" />
     <ClCompile Include="Sources\Tests\TestPhysics.cpp" />
+    <ClCompile Include="Sources\Tests\TestMovement.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sources\PhysicObject.h" />
@@ -308,6 +309,7 @@
     <ClInclude Include="Sources\VertexArray.h" />
     <ClInclude Include="Sources\VertexBufferLayout.h" />
     <ClInclude Include="Sources\Tests\TestPhysics.h" />
+    <ClInclude Include="Sources\Tests\TestMovement.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Ressources\Shaders\Basic.shader" />
