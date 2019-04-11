@@ -77,6 +77,8 @@ void PhysicObject::OnCollision(PhysicObject *that, Sides * collisionSide){
 	Sides side = *collisionSide;
 	glm::vec3 normalToFace;
 	glm::vec3 thisSpeed = glm::vec3(this->m_speed), thatSpeed = glm::vec3(that->m_speed); 
+	std::cout << "Speed at collision : " << glm::to_string(thisSpeed) << " other speed : " << glm::to_string(thatSpeed) << std::endl;
+	std::cout << "Position at collision : " << glm::to_string(*m_position) << " other position : " << glm::to_string(*(that->m_position)) << std::endl;
 	if (side == LEFTSIDE) normalToFace = glm::vec3(-1.0f, 0.0f, 0.0f);
 	else if(side == RIGHTSIDE) normalToFace = glm::vec3(1.0f, 0.0f, 0.0f);
 	else if (side == TOP) normalToFace = glm::vec3(0.0f, -1.0f, 0.0f);
@@ -111,6 +113,16 @@ void PhysicObject::OnCollision(PhysicObject *that, Sides * collisionSide){
 glm::vec4 PhysicObject::GetSpeed()
 {
 	return m_speed;
+}
+
+void PhysicObject::SetSpeed(glm::vec4 speed)
+{
+	m_speed = speed;
+}
+
+void PhysicObject::SetSpeed(glm::vec3 speed)
+{
+	m_speed = glm::vec4(speed, 1.0f);
 }
 
 glm::vec4 PhysicObject::GetPos()

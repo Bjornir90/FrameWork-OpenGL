@@ -30,16 +30,16 @@ namespace testMovement {
 
 	// timing
 	float deltaTime = 0.0f;	// time between current frame and last frame
-	float lastFrame = 0.0f;
+	float lastFrame = glfwGetTime();
 	float totalTime = 0.0f;
 
 	Force jumpForce(glm::vec4(0.0f, 0.2f, 0.0f, 0.0f), glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
 	Force movementForce(glm::vec4(0.1f, 0.0f, 0.0f, 0.0f), glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
 	float playerAngle = 0.0f;
 
-	glm::vec3 cubePositions[] = {
-		glm::vec3(0.0f,  150.0f,  0.0f),
-		glm::vec3(0.0f,  0.0f, 0.0f)
+	glm::vec4* cubePositions[] = {
+		new glm::vec4(0.0f,  250.0f,  0.0f, 1.0f),
+		new glm::vec4(0.0f,  0.0f, 0.0f, 1.0f)
 	};
 
 	glm::vec3 cubeSpeeds[] = {
@@ -50,8 +50,8 @@ namespace testMovement {
 	glm::mat4 playerRotation = glm::rotate(playerAngle, glm::vec3(0.0f, 1.0f, 0.0f));
 
 	PhysicObject objects[] = {
-		PhysicObject(glm::vec4(cubePositions[0], 1.0f), 100.0, 100.0, 100.0, 10.0, false),
-		PhysicObject(glm::vec4(cubePositions[1], 1.0f), 100.0, 100.0, 100.0, 10.0, true)
+		PhysicObject(cubePositions[0], 100.0, 100.0, 100.0, 10.0, false),
+		PhysicObject(cubePositions[1], 100.0, 100.0, 100.0, 10.0, true)
 	};
 
 	void processInput(GLFWwindow *window);
@@ -287,19 +287,19 @@ namespace testMovement {
 
 			Sides collisionSide;
 
-			if (objects[0].collidesWith(&objects[1], &collisionSide)) {
-				objects[0].onCollision(&objects[1], &collisionSide);
+			if (objects[0].CollidesWith(&objects[1], &collisionSide)) {
+				objects[0].OnCollision(&objects[1], &collisionSide);
 			}
 
-			objects[0].applyForce(m_gravity);
+			objects[0].ApplyForce(m_gravity);
 
 			for (int i = 0; i < 2; i++) {
 
-				cubePositions[i] = glm::vec3(objects[i].getPos());
+				*(cubePositions[i]) = objects[i].GetPos();
 
-				objects[i].update(deltaTime);
+				objects[i].Update(deltaTime);
 
-				modele = glm::translate(glm::mat4(1.0f), cubePositions[i]);
+				modele = glm::translate(glm::mat4(1.0f), glm::vec3(*(cubePositions[i])));
 
 				if (i == 0) {
 					//modele = glm::translate(modele, cubePositions[i] * -1.0f);
@@ -354,7 +354,7 @@ namespace testMovement {
 		if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
 			//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 			//glfwSetCursorPosCallback(window, NULL);
-			objects[0].applyForce(jumpForce);
+			objects[0].ApplyForce(jumpForce);
 		}
 
 		//on quitte le mode camera
@@ -396,9 +396,9 @@ namespace testMovement {
 
 		//ZQSD mode
 		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS || axes[1] > 0.5f)
-			objects[0].applyForce(movementForce.MultiplyByMatrix(playerRotation));
+			objects[0].ApplyForce(movementForce.MultiplyByMatrix(playerRotation));
 		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS || axes[1] < -0.5f)
-			objects[0].applyForce(movementForce.MultiplyByMatrix(playerRotation).MultiplyByScalar(-1.0f));
+			objects[0].ApplyForce(movementForce.MultiplyByMatrix(playerRotation).MultiplyByScalar(-1.0f));
 		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS || axes[0] > 0.5f) {
 			playerAngle += glm::radians(5.0f);
 			playerRotation = glm::rotate(playerAngle, glm::vec3(0.0f, 1.0f, 0.0f));

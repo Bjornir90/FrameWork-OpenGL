@@ -30,22 +30,22 @@ namespace testPhysics {
 
 	// timing
 	float deltaTime = 0.0f;	// time between current frame and last frame
-	float lastFrame = 0.0f;
+	float lastFrame = glfwGetTime();
 	float totalTime = 0.0f;
 
-	glm::vec3 cubePositions[] = {
-		glm::vec3(0.0f,  0.0f,  0.0f),
-		glm::vec3(0.0f,  250.0f, 0.0f)
+	glm::vec4* cubePositions[] = {
+		new glm::vec4(0.0f,  0.0f,  0.0f, 1.0f),
+		new glm::vec4(0.0f,  150.0f, 0.0f, 1.0f)
 	};
 
 	glm::vec3 cubeSpeeds[] = {
-		glm::vec3(0.0f, 1.0f, 0.0f),
-		glm::vec3(0.0f, -2.0f, 0.0f)
+		glm::vec3(0.0f, 0.2f, 0.0f),
+		glm::vec3(0.05f, -0.1f, 0.0f)
 	};
 
 	PhysicObject objects[] = {
-		PhysicObject(glm::vec4(cubePositions[0], 1.0f), 100.0, 100.0, 100.0, 10.0, false),
-		PhysicObject(glm::vec4(cubePositions[1], 1.0f), 100.0, 100.0, 100.0, 50.0, false)
+		PhysicObject(cubePositions[0], 100.0, 100.0, 100.0, 10.0, false),
+		PhysicObject(cubePositions[1], 100.0, 100.0, 100.0, 50.0, false)
 	};
 
 	void processInput(GLFWwindow *window);
@@ -226,13 +226,17 @@ namespace testPhysics {
 		m_Shader->SetUniform1i("u_Texture", 0);
 
 		//init physical objects so collision occurs
-		objects[0].applyForce(Force(glm::vec4(0.0f, 0.1f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
-		objects[0].update(1.0f);
-		objects[1].applyForce(Force(glm::vec4(0.1f, -0.35f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
-		objects[1].update(1.0f);
-		std::cout << "Speed of first object : " << glm::to_string(objects[0].getSpeed()) << std::endl;
-		glm::vec3 testTemp = glm::vec3(0.0f, 1.0f, 0.0f);
-		std::cout << "Original : " << glm::to_string(testTemp) << " Inverse : " << glm::to_string(-testTemp) << std::endl;
+
+		objects[0].SetSpeed(cubeSpeeds[0]);
+		objects[1].SetSpeed(cubeSpeeds[1]);
+
+		/*
+		objects[0].ApplyForce(Force(glm::vec4(0.0f, 0.1f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
+		objects[0].Update(1.0f);
+		objects[1].ApplyForce(Force(glm::vec4(0.1f, -0.35f, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
+		objects[1].Update(1.0f);
+		std::cout << "Speed of first object : " << glm::to_string(objects[0].GetSpeed()) << std::endl;
+		*/
 	}
 
 
@@ -289,17 +293,17 @@ namespace testPhysics {
 
 			Sides collisionSide;
 
-			if (objects[0].collidesWith(&objects[1], &collisionSide)) {
-				objects[0].onCollision(&objects[1], &collisionSide);
+			if (objects[0].CollidesWith(&objects[1], &collisionSide)) {
+				objects[0].OnCollision(&objects[1], &collisionSide);
 			}
 
 			for (int i = 0; i < 2; i++) {
 
-				objects[i].update(deltaTime);
+				objects[i].Update(deltaTime);
 
-				cubePositions[i] = glm::vec3(objects[i].getPos());
+				*(cubePositions[i]) = objects[i].GetPos();
 
-				modele = glm::translate(glm::mat4(1.0f), cubePositions[i]);
+				modele = glm::translate(glm::mat4(1.0f), glm::vec3(*(cubePositions[i])));
 
 				/*std::cout << "Model Matrix before translation : " << glm::to_string(modele) << std::endl;
 

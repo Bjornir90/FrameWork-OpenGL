@@ -22,6 +22,8 @@ public:
     bool CollidesWith(PhysicObject* that, Sides* collisionSide);
     void OnCollision(PhysicObject* that, Sides* collisionSide);
 	glm::vec4 GetSpeed();
+	void SetSpeed(glm::vec4 speed);
+	void SetSpeed(glm::vec3 speed);
 	glm::vec4 GetPos();
 	glm::vec3 GetCenter();
 };
